@@ -1,6 +1,5 @@
 import java.util.Iterator;
 import edu.princeton.cs.algs4.StdRandom;
-import edu.princeton.cs.algs4.In;
 
 public class RandomizedQueue<Item> implements Iterable<Item> {
    
@@ -40,7 +39,9 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
     public Item dequeue(){                    // remove and return a random item
         if (isEmpty())
             throw new java.util.NoSuchElementException();
-        StdRandom.shuffle(queue, 0, index);
+        if ( index != 0 ) {
+            StdRandom.shuffle(queue, 0, index);
+        }
         Item item = queue[--index];
         queue[index] = null;
         if (index > 0 && index == size/4) resize(size/2);
@@ -49,8 +50,13 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
     
     public Item sample(){                     // return (but do not remove) a random item
         if (isEmpty())
-            throw new java.util.NoSuchElementException();
-        int random = StdRandom.uniform(0,index-1);        
+            throw new java.util.NoSuchElementException();        
+        int random;
+        if (index > 1) {
+            random = StdRandom.uniform(0,index);  
+        }
+        else 
+            random = 0;
         return queue[random];
     }
     
@@ -62,12 +68,14 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
     private class ListIterator implements Iterator<Item> {
         
         private int current = 0;
-        Item[] temp = (Item[]) new Object[index+1];
+        private Item[] temp = (Item[]) new Object[index+1];
         
         public ListIterator(Item[] queue){
             for (int i = 0; i < index; i++)
                 temp[i] = queue[i];
-            StdRandom.shuffle(temp, 0, index);
+            if ( index != 0 ) {
+                StdRandom.shuffle(temp, 0, index);
+            }
             //temp[index] = null;
         }
         public boolean hasNext() { 

@@ -1,13 +1,14 @@
-import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.StdIn;
+
 import java.util.Iterator;
 
 public class Permutation {
    public static void main(String[] args){
        int k = Integer.parseInt(args[0]);
-       In in = new In(args[1]);      // input file
+       //In in = new In(args[2]);      // input file
        RandomizedQueue<String> bag = new RandomizedQueue<String>();
-       while (!in.isEmpty()) {
-           String item = in.readString();
+       while (!StdIn.isEmpty()) {
+           String item = StdIn.readString();
            bag.enqueue(item);
            //System.out.print("test\n");
        }
