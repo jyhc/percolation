@@ -1,4 +1,9 @@
+import java.util.Arrays;
 import java.util.Comparator;
+
+import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.StdDraw;
+import edu.princeton.cs.algs4.StdOut;
 
 public class BruteCollinearPoints{
     
@@ -6,7 +11,7 @@ public class BruteCollinearPoints{
     private int size;    
     private Comparator<Point> comparator;
     private Point[] eqslope = new Point[4]; //points ordered from smallest to largest
-    private Point temp;
+    //private Point temp;
     private LineSegment[] segs;
     private int segsindex;
     
@@ -36,7 +41,7 @@ public class BruteCollinearPoints{
                             eqslope[1] = points[j];
                             eqslope[2] = points[k];
                             eqslope[3] = points[l];
-                            for (int c = 0; c < 4; c++){//insertion sort for 4 elements
+/*                            for (int c = 0; c < 4; c++){//insertion sort for 4 elements
                                 for (int d = c; d > 0; d--){
                                     if (eqslope[d].compareTo(eqslope[d-1]) == -1){//exchange
                                         temp = eqslope[d];
@@ -45,8 +50,9 @@ public class BruteCollinearPoints{
                                     }
                                     else break;
                                 }                                
-                            }
-                            segs[++segsindex] = new LineSegment(eqslope[0],eqslope[3]);
+                            }*/
+                            Arrays.sort(eqslope, 0, 4);//replaced above with array sort
+                            segs[segsindex++] = new LineSegment(eqslope[0],eqslope[3]);
                         }
                         else segcount = 1; //reset counter                                                
                     }
@@ -59,6 +65,46 @@ public class BruteCollinearPoints{
         return segsindex;
     }
     public LineSegment[] segments(){                // the line segments
-        return segs;
+        int count = 0;
+        for (LineSegment seg : segs){
+            if (seg == null) break;
+            count++;
+        }
+        LineSegment[] newseg = new LineSegment[count];
+        for (int i = 0; i < count; i++){
+            newseg[i] = segs[i];
+        }
+        return newseg;
+    }
+    
+    public static void main(String[] args) {
+
+        // read the n points from a file
+        In in = new In(args[0]);
+        int n = in.readInt();
+        Point[] points = new Point[n];
+        for (int i = 0; i < n; i++) {
+            int x = in.readInt();
+            int y = in.readInt();
+            points[i] = new Point(x, y);
+        }
+
+        // draw the points
+        StdDraw.enableDoubleBuffering();
+        StdDraw.setXscale(0, 32768);
+        StdDraw.setYscale(0, 32768);
+        for (Point p : points) {
+            p.draw();
+        }
+        StdDraw.show();
+
+        // print and draw the line segments
+        BruteCollinearPoints collinear = new BruteCollinearPoints(points);
+        for (LineSegment segment : collinear.segments()) {
+            StdOut.println(segment);
+            segment.draw();
+        }
+        StdDraw.show();
     }
 }
+
