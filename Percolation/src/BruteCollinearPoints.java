@@ -13,7 +13,7 @@ public class BruteCollinearPoints{
     private Point[] eqslope = new Point[4]; //points ordered from smallest to largest
     //private Point temp;
     private LineSegment[] segs;
-    private int segsindex;
+    private int segsindex = 0;
     
     public BruteCollinearPoints(Point[] points){    // finds all line segments containing 4 points
         if (points == null) throw new java.lang.NullPointerException();
@@ -28,7 +28,7 @@ public class BruteCollinearPoints{
                 if (points[i].compareTo(points[j]) == 0) throw new java.lang.IllegalArgumentException();
             }
         }
-        segs = new LineSegment[size];
+        segs = new LineSegment[size*size];
         for (int i = 0; i < size; i++){
             for (int j = i+1; j < size; j++){
                 for (int k = j+1; k < size; k++){
@@ -54,7 +54,7 @@ public class BruteCollinearPoints{
                             Arrays.sort(eqslope, 0, 4);//replaced above with array sort
                             segs[segsindex++] = new LineSegment(eqslope[0],eqslope[3]);
                         }
-                        else segcount = 1; //reset counter                                                
+                        segcount = 1; //reset counter                                                
                     }
                 }                    
             }
@@ -73,6 +73,7 @@ public class BruteCollinearPoints{
         LineSegment[] newseg = new LineSegment[count];
         for (int i = 0; i < count; i++){
             newseg[i] = segs[i];
+            segs[i] = null;
         }
         return newseg;
     }
