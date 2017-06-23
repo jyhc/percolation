@@ -9,15 +9,18 @@ public class FastCollinearPoints {
     
     private int size;    
     private Comparator<Point> comparator;
-    private Point[] sub_points;    
+    private Point[] subPoints;  
+    private Point[] segmentA;
+    private Point[] segmentB;
     private LineSegment[] segs;
     private int segsindex = 0;
     private Point[] coPoints;
     private int coIndex;
     private int collinearValue = 3;
+    private final LineSegment[] newseg;
     
     
-    public FastCollinearPoints(Point[] points){     // finds all line segments containing 4 or more points
+    public FastCollinearPoints(Point[] points) {     // finds all line segments containing 4 or more points
         if (points == null) throw new java.lang.NullPointerException();
         size = points.length;
         for (int i = 0; i < size; i++){
@@ -25,57 +28,100 @@ public class FastCollinearPoints {
                 throw new java.lang.NullPointerException();
             }            
         }
-        for (int i = 0; i < size; i++){
-            for (int j = i+1; j < size; j++){
+        for (int i = 0; i < size; i++) {
+            for (int j = i+1; j < size; j++) {
                 if (points[i].compareTo(points[j]) == 0) throw new java.lang.IllegalArgumentException();
             }
         }
         
+        segmentA = new Point[size*size];
+        segmentB = new Point[size*size];
         segs = new LineSegment[size*size];
-        for (int i = 0; i < size; i++){
-            sub_points = new Point[size-i-1];
+        for (int i = 0; i < size; i++) {
+            subPoints = new Point[size-1];
             comparator = points[i].slopeOrder();
-            for (int j = i+1; j < size; j++){
-                sub_points[i] = points[j];                
+            
+            for (int j = 0, index = 0; j < size; j++) {
+            	if (j != i) subPoints[index++] = points[j];                
             }
-            Arrays.sort(sub_points,comparator);//sort by slope
-            for (int x = 0; x < sub_points.length; x++){
+            Arrays.sort(subPoints,comparator);// sort by slope
+            for (int x = 0; x < size-1; x++) {
                 coPoints = new Point[size];
                 coIndex = 0;
-                for (int y = x+1; y < sub_points.length; y++){
-                    if (sub_points[x].slopeTo(points[i]) != sub_points[y].slopeTo(points[i])){
-                        x=y;
+                for (int y = x+1; y < size-1; y++) {
+                    if (comparator.compare(subPoints[x], subPoints[y]) != 0){
+                        x=y-1;
                         break;
                     } 
-                    coPoints[coIndex++] = sub_points[y];
-                    
+                    else {
+                    	if (x == (y-1)) coPoints[coIndex++] = subPoints[x];
+                    	coPoints[coIndex++] = subPoints[y];
+                    }                    
                 }
-                if (coIndex >= collinearValue){
+                if (coIndex >= collinearValue) {
                     coPoints[coIndex++] = points[i];
                     Arrays.sort(coPoints,0,coIndex);
+                    segmentA[segsindex] = coPoints[0]; // keep track of segments by points
+                    segmentB[segsindex] = coPoints[coIndex-1];
                     segs[segsindex++] = new LineSegment(coPoints[0],coPoints[coIndex-1]);
-                }
-                
-            }
-            
+                    for (int z = 0 ; z < segsindex-1; z++) { // Point check for duplicate segments
+                    	if (segmentA[segsindex-1] == segmentA[z] && segmentB[segsindex-1] == segmentB[z]) {
+                    		segsindex--;
+                    		break;
+                    	}                    	
+                    }                    
+                }                
+            }            
         }
-        
-    }
-    
-    public int numberOfSegments(){        // the number of line segments
-        return segsindex;
-    }
-    public LineSegment[] segments(){                // the line segments
-        int count = 0;
-        for (LineSegment seg : segs){
-            if (seg == null) break;
-            count++;
-        }
-        LineSegment[] newseg = new LineSegment[count];
-        for (int i = 0; i < count; i++){
+
+        newseg = new LineSegment[segsindex];
+        for (int i = 0; i < segsindex; i++) {
             newseg[i] = segs[i];
             segs[i] = null;
         }
-        return newseg;
+        segs = null;
+    }
+    
+    public int numberOfSegments() {        // the number of line segments
+    	int temp = segsindex;
+    	return temp;
+    }
+    
+    public LineSegment[] segments() {                // the line segments
+        LineSegment[] segCopy = new LineSegment[segsindex];
+    	for (int i = 0; i < segsindex; i++) {
+        	segCopy[i] = newseg[i];
+        }
+    	return segCopy;
+    }
+    
+    public static void main(String[] args) {
+
+        // read the n points from a file
+        In in = new In(args[0]);
+        int n = in.readInt();
+        Point[] points = new Point[n];
+        for (int i = 0; i < n; i++) {
+            int x = in.readInt();
+            int y = in.readInt();
+            points[i] = new Point(x, y);
+        }
+
+        // draw the points
+        StdDraw.enableDoubleBuffering();
+        StdDraw.setXscale(0, 32768);
+        StdDraw.setYscale(0, 32768);
+        for (Point p : points) {
+            p.draw();
+        }
+        StdDraw.show();
+
+        // print and draw the line segments
+        FastCollinearPoints collinear = new FastCollinearPoints(points);
+        for (LineSegment segment : collinear.segments()) {
+            StdOut.println(segment);
+            segment.draw();
+        }
+        StdDraw.show();
     }
 }
