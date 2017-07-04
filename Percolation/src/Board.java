@@ -28,9 +28,22 @@ public class Board {
                 twinCopy[i][j] = blocks[i][j];
                 if (copy[i][j] != 0) {
                     int shouldBe = (1 + i) * row - (col - (j + 1)); //convert from row,col to value
+                    if (shouldBe == row*col) shouldBe = 0;
                     if (copy[i][j] != shouldBe) {
-                        int iCorrect = copy[i][j] % col - 1;
-                        int jCorrect = copy[i][j] / row - 1;
+                        int iCorrect;
+                        int jCorrect;
+                        if (copy[i][j] %  col == 0) {
+                            jCorrect = col - 1;
+                            iCorrect = copy[i][j] / col - 1;                            
+                        } else {
+                            if (copy[i][j] < col) {
+                                iCorrect = 0;
+                                jCorrect = copy[i][j] - 1;
+                            } else {
+                                iCorrect = copy[i][j] / col;
+                                jCorrect = copy[i][j] % row - 1;
+                            }
+                        }
                         manhattan += Math.abs(i - iCorrect) + Math.abs(j - jCorrect);
                         hamming++;
                     }
