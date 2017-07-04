@@ -2,6 +2,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Stack;
 
+import edu.princeton.cs.algs4.In;
+
 public class Board {
     
     private final int[][] copy;
@@ -14,11 +16,11 @@ public class Board {
     private int blankj = 0;
     
     public Board(int[][] blocks) {          // construct a board from an n-by-n array of blocks
-        int row = blocks.length;        
+        row = blocks.length;        
         copy = new int[row][];
         twinCopy = new int[row][];
         for (int i = 0; i < row; i++) {// (where blocks[i][j] = block in row i, column j)
-            int col = blocks[i].length;
+            col = blocks[i].length;
             copy[i] = new int[col];
             twinCopy[i] = new int[col];
             for (int j = 0; j < col; j++) {
@@ -32,13 +34,14 @@ public class Board {
                         manhattan += Math.abs(i - iCorrect) + Math.abs(j - jCorrect);
                         hamming++;
                     }
-                } else {    //keep track of blank tile for finding neighbor
+                } else {
                     blanki = i;
-                    blankj = j;
+                    blankj = j;   //keep track of blank tile for finding neighbor
                 }
-            }        
-        }
+            }
+        }        
     }
+
     
     public int dimension() {                 // board dimension n
         return row;
@@ -102,24 +105,60 @@ public class Board {
     public Iterable<Board> neighbors() {     // all neighboring boards
         Stack<Board> stackNeighbor = new Stack<Board>();
         if (blanki - 1 >= 0) { // has top neighbor
-            
+            twinCopy[blanki][blankj] = copy[blanki - 1][blankj];
+            twinCopy[blanki - 1][blankj] = copy[blanki][blankj];
+            stackNeighbor.push((new Board(twinCopy)));
+            twinCopy[blanki][blankj] = copy[blanki][blankj];    //reset twinCopy
+            twinCopy[blanki - 1][blankj] = copy[blanki - 1][blankj];
         }
         if (blankj -1 >= 0) { //has left neighbor
-            
+            twinCopy[blanki][blankj] = copy[blanki][blankj - 1];
+            twinCopy[blanki][blankj - 1] = copy[blanki][blankj];
+            stackNeighbor.push((new Board(twinCopy)));
+            twinCopy[blanki][blankj] = copy[blanki][blankj];    //reset twinCopy
+            twinCopy[blanki][blankj - 1] = copy[blanki][blankj - 1];
         }
-        if (blanki + 1 < row) { //has right neighbor
-            
+        if (blanki + 1 < row) { //has down neighbor
+            twinCopy[blanki][blankj] = copy[blanki + 1][blankj];
+            twinCopy[blanki + 1][blankj] = copy[blanki][blankj];
+            stackNeighbor.push((new Board(twinCopy)));
+            twinCopy[blanki][blankj] = copy[blanki][blankj];    //reset twinCopy
+            twinCopy[blanki + 1][blankj] = copy[blanki + 1][blankj];
         }
-        if (blanki + 1 < col) {   //has down neighbor
-            
+        if (blankj + 1 < col) {   //has right neighbor
+            twinCopy[blanki][blankj] = copy[blanki][blankj + 1];
+            twinCopy[blanki][blankj + 1] = copy[blanki][blankj];
+            stackNeighbor.push((new Board(twinCopy)));
+            twinCopy[blanki][blankj] = copy[blanki][blankj];    //reset twinCopy
+            twinCopy[blanki][blankj + 1] = copy[blanki][blankj + 1];
         }
+        return stackNeighbor;
     }
        
     public String toString() {               // string representation of this board (in the output format specified below)
-        
+        StringBuilder s = new StringBuilder();
+        s.append(row + "\n");
+        for (int i = 0; i < row; i++) {
+            for (int j = 0; j < col; j++) {
+                s.append(String.format("%d ", copy[i][j]));
+            }
+            s.append("\n");
+        }
+        return s.toString();
     }
 
     public static void main(String[] args) {// unit tests (not graded)
-        
+        In in = new In(args[0]);
+        int n = in.readInt();
+        int[][] blocks = new int[n][n];
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                blocks[i][j] = in.readInt();
+        Board initial = new Board(blocks);
+        System.out.print(initial.toString());
+        Board twin = initial.twin();
+        System.out.print(twin.toString());
+        System.out.print(initial.hamming() + "\n");
+        System.out.print(initial.manhattan());
     }
 }
