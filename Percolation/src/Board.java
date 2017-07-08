@@ -14,6 +14,8 @@ public class Board {
     private int hamming = 0;
     private int blanki = 0;
     private int blankj = 0;
+    public Board parent = null;
+    public int steps = 0;
     
     public Board(int[][] blocks) {          // construct a board from an n-by-n array of blocks
         row = blocks.length;        
@@ -121,13 +123,17 @@ public class Board {
             twinCopy[blanki][blankj] = copy[blanki - 1][blankj];
             twinCopy[blanki - 1][blankj] = copy[blanki][blankj];
             stackNeighbor.push((new Board(twinCopy)));
+            stackNeighbor.peek().parent = this;
+            stackNeighbor.peek().steps++;
             twinCopy[blanki][blankj] = copy[blanki][blankj];    //reset twinCopy
             twinCopy[blanki - 1][blankj] = copy[blanki - 1][blankj];
         }
-        if (blankj -1 >= 0) { //has left neighbor
+        if (blankj - 1 >= 0) { //has left neighbor
             twinCopy[blanki][blankj] = copy[blanki][blankj - 1];
             twinCopy[blanki][blankj - 1] = copy[blanki][blankj];
             stackNeighbor.push((new Board(twinCopy)));
+            stackNeighbor.peek().parent = this;
+            stackNeighbor.peek().steps++;
             twinCopy[blanki][blankj] = copy[blanki][blankj];    //reset twinCopy
             twinCopy[blanki][blankj - 1] = copy[blanki][blankj - 1];
         }
@@ -135,6 +141,8 @@ public class Board {
             twinCopy[blanki][blankj] = copy[blanki + 1][blankj];
             twinCopy[blanki + 1][blankj] = copy[blanki][blankj];
             stackNeighbor.push((new Board(twinCopy)));
+            stackNeighbor.peek().parent = this;
+            stackNeighbor.peek().steps++;
             twinCopy[blanki][blankj] = copy[blanki][blankj];    //reset twinCopy
             twinCopy[blanki + 1][blankj] = copy[blanki + 1][blankj];
         }
@@ -142,9 +150,12 @@ public class Board {
             twinCopy[blanki][blankj] = copy[blanki][blankj + 1];
             twinCopy[blanki][blankj + 1] = copy[blanki][blankj];
             stackNeighbor.push((new Board(twinCopy)));
+            stackNeighbor.peek().parent = this;
+            stackNeighbor.peek().steps++;
             twinCopy[blanki][blankj] = copy[blanki][blankj];    //reset twinCopy
             twinCopy[blanki][blankj + 1] = copy[blanki][blankj + 1];
         }
+        
         return stackNeighbor;
     }
        
@@ -169,9 +180,14 @@ public class Board {
                 blocks[i][j] = in.readInt();
         Board initial = new Board(blocks);
         System.out.print(initial.toString());
-        Board twin = initial.twin();
+/*        Board twin = initial.twin();
         System.out.print(twin.toString());
         System.out.print(initial.hamming() + "\n");
         System.out.print(initial.manhattan());
+        System.out.print(initial.equals(twin.twin()));*/
+        Iterator<Board> i = initial.neighbors().iterator();
+        while (i.hasNext()) {
+            System.out.print(i.next().toString());
+        }
     }
 }
