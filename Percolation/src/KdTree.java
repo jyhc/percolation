@@ -94,11 +94,16 @@ public class KdTree {
     }
     
     public void draw() {                        // draw all points to standard draw 
-        StdDraw.setPenColor(StdDraw.BLACK);
-        StdDraw.setPenRadius(0.01);
+        
         Queue<Node> keys = keys();
         for (Node node : keys) {
+            StdDraw.setPenColor(StdDraw.BLACK);
+            StdDraw.setPenRadius(0.01);
             node.p.draw();
+            if (!node.horizontal) {
+                StdDraw.setPenColor(StdDraw.RED);
+            } else StdDraw.setPenColor(StdDraw.BLUE);
+            StdDraw.setPenRadius(0);
             node.rect.draw();
         }
     }
@@ -115,12 +120,44 @@ public class KdTree {
         queue = keys(current.rt, queue);
         return queue;
     } 
-/*    public Iterable<Point2D> range(RectHV rect) {            // all points that are inside the rectangle 
+    public Iterable<Point2D> range(RectHV rect) {            // all points that are inside the rectangle 
         if (rect == null) throw new java.lang.IllegalArgumentException();
-    }*/
-/*    public Point2D nearest(Point2D p) {            // a nearest neighbor in the set to point p; null if the set is empty
+        Queue<Point2D> queue = new Queue<>();
+        queue = range(rect, root, queue);
+        return queue;
+    }
+    
+    private Queue<Point2D> range(RectHV rect, Node current, Queue<Point2D> queue) {
+        if (current == null) return queue;
+        if (rect.contains(current.p)) queue.enqueue(current.p);
+        if (rect.intersects(current.rect)) {
+            queue = range(rect, current.lb, queue);
+            queue = range(rect, current.rt, queue);
+        } else return queue;
+        return queue;
+    }
+    public Point2D nearest(Point2D p) {            // a nearest neighbor in the set to point p; null if the set is empty
         if (p == null) throw new java.lang.IllegalArgumentException();
-    }*/
+        if (root == null) return null;
+        return nearest(root, p, root.p);
+    }
+    
+    private Point2D nearest(Node current, Point2D query, Point2D closest) {
+        if (current == null) return closest;
+        if (current.rect.distanceSquaredTo(query) > closest.distanceSquaredTo(query)) return closest;
+        if (current.p.distanceSquaredTo(query) < closest.distanceSquaredTo(query)) closest = current.p;
+        if (current.rect.contains(query)) {
+            if (current.lb != null) {
+                if (current.lb.rect.contains(query)) closest = nearest(current.lb, query, closest);
+            }
+            if (current.rt != null) {
+                if (current.rt.rect.contains(query)) closest = nearest(current.rt, query, closest);
+            }  
+        } else {
+            
+        }
+        return closest;
+    }
     
     private static class Node { //static-no access to other members of enclosing class
         private Point2D p;      // the point
@@ -156,6 +193,17 @@ public class KdTree {
         p = new Point2D(0.5, 0.4);
         System.out.print(tree.contains(p));
         tree.draw();
+        RectHV rect = new RectHV(0.2,0.41,0.7,0.8);
+        
+        for (Point2D point : tree.range(rect)) {
+            StdDraw.setPenColor(StdDraw.RED);
+            StdDraw.setPenRadius(0.03);
+            point.draw();
+            System.out.print(point.toString());
+        }
+        StdDraw.setPenColor(StdDraw.ORANGE);
+        StdDraw.setPenRadius(0);
+        rect.draw();
         
     }
  }
